@@ -122,10 +122,18 @@ inorder (Node val left right) = (inorder left) ++ [val] ++ (inorder right)
 -- Reimplement them using iterative helper functions (locally defined using
 -- a 'where' clause) with accumulators to make them O(n)
 toBList' :: [a] -> BList a
-toBList' = undefined
+toBList' xs = helper xs Nil where
+  -- just keep nil
+  helper [] n = n
+  -- build starting from the front of the list, since Nil is being
+  -- passed in so (Snoc n y) builds (Snoc nil [front of list]) and keeps building
+  -- at O(1)
+  helper (y:ys) n = helper ys (Snoc n y)
 
 fromBList' :: BList a -> [a]
-fromBList' = undefined
+fromBList' bl = helper bl [] where
+  helper Nil ys = ys
+  helper (Snoc bl val) ys = helper bl (val:ys) 
 
 -- Even tree functions that do multiple recursive calls can be rewritten
 -- iteratively using lists of trees and an accumulator. For example,
@@ -141,13 +149,28 @@ sum_nodes' t = sum_nodes_it [t] 0
 -- into iterative functions with accumulators
 
 num_empties' :: Tree a -> Int
-num_empties' = undefined
+num_empties' t = helper [t] 0 where
+  helper :: [Tree a] -> Int -> Int
+  -- if we hit nil just ignore
+  helper [] n = n
+  -- if we hit empty then add 1 to accumulator
+  helper (Empty : ts) n = helper ts (n+1)
+  -- if we hit anything but empty then push left and right onto the front of the list
+  helper (Node val left right : ts) n = helper (left:right:ts) n
 
 num_nodes' :: Tree a -> Int
-num_nodes' = undefined
+num_nodes' t = helper [t] 0 where
+  helper:: [Tree a] -> Int -> Int
+  helper [] n = n
+  helper (Empty : ts) n = helper ts n
+  helper (Node val left right : ts) n = helper (left:right:ts) n+1
 
 sum_nodes2' :: (Num a) => Tree a -> a
-sum_nodes2' = undefined
+sum_nodes2' t = helper [t] 0 where
+  helper :: (Num a) => [Tree a] -> a -> a
+  helper [] n = n
+  helper (Empty : ts) n = helper ts n
+  helper (Node val left right : ts) n = helper (left:right:ts) (val + n)
 
 ---- Part 3: Higher-order functions ----------------
 
@@ -157,36 +180,67 @@ sum_nodes2' = undefined
 -- most once. All functions should produce the same output as the originals.
 
 my_map :: (a -> b) -> [a] -> [b]
-my_map = undefined
+my_map f [] = []
+-- build list front to back, apply f to head then append to rest of list
+my_map f (x:xs) = f x : (my_map f xs)
 
 my_all :: (a -> Bool) -> [a] -> Bool
-my_all = undefined
+-- if any element does satisfy the function then recursively move through
+-- else if it doesn't then just return False
+my_all f (x:xs) = if f x then my_all f xs else False
+-- if the function has been applied to every value and hasn't bailed out
+-- then it's good and return True
+my_all _ [] = True -- note that even on empty lists all returns True no matter the f
 
 my_any :: (a -> Bool) -> [a] -> Bool
-my_any = undefined
+-- if head satisfies the function then return true
+-- else keep moving through
+my_any f (x:xs) = if f x then True else my_any f xs
+-- if nothing satisfies f then return False
+my_any _ [] = False
 
 my_filter :: (a -> Bool) -> [a] -> [a]
-my_filter = undefined
+my_filter f (x:xs) = if f x then x:(my_filter f xs) else my_filter f xs
+my_filter _ [] = []
 
 my_dropWhile :: (a -> Bool) -> [a] -> [a]
-my_dropWhile = undefined
+-- if the function is satisfied then send back the list with the head dropped
+-- else return the list with the head
+my_dropWhile f (x:xs) = if f x then my_dropWhile f xs else x:xs
+-- if the list is empty just send it as empty
+my_dropWhile _ [] = [] 
 
 my_takeWhile :: (a -> Bool) -> [a] -> [a]
-my_takeWhile = undefined
+-- if the function is satisfied by the head then append it to a list and call
+-- on the rest of the list
+-- else send back []
+my_takeWhile f (x:xs) = if f x then x:(my_takeWhile f xs) else []
+my_takeWhile _ [] = []
 
 my_break :: (a -> Bool) -> [a] -> ([a], [a])
-my_break = undefined
+-- we're done here
+my_break _ [] = ([],[]) 
+
+my_break f (x:xs) = 
+  -- if the function is satisfied by the head, stop here and return the rest untouched
+  if f x then ([], x:xs) 
+  -- else include this element in the first list and keep going
+  else let (ys, zs) = my_break f xs in (x:ys, zs)
 
 -- Implement the Prelude functions and, or, concat using foldr
 
+-- foldr looks like:
+-- foldr f z [x1,x2,x3]
+-- x1 `f` (x2 `f` (x3 `f` z))
+
 my_and :: [Bool] -> Bool
-my_and = undefined
+my_and xs = foldr (&&) True xs
 
 my_or :: [Bool] -> Bool
-my_or = undefined
+my_or xs = foldr (||) False xs
 
 my_concat :: [[a]] -> [a]
-my_concat = undefined
+my_concat xs = foldr (++) [] xs
 
 -- Implement the Prelude functions sum, product, reverse using foldl
 
