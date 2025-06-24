@@ -82,24 +82,39 @@ num_empties ( Node _ (left) (right)) = num_empties left + num_empties right
 
 -- Count number of Node's in the tree
 num_nodes :: Tree a -> Int
-num_nodes = undefined
+-- if we hit empty then just don't accumulate
+num_nodes Empty = 0
+-- if we have a node then increment by 1 and recursively call num_nodes on the left and right
+num_nodes (Node _ left right) = 1 + (num_nodes left) + (num_nodes right)
+ 
 
 -- Insert a new node in the leftmost spot in the tree
 insert_left :: a -> Tree a -> Tree a
-insert_left = undefined
+-- if we hit the empty on the left side then insert the new node
+insert_left val Empty = Node val Empty Empty
+-- if we don't hit empty immediately, then traverse down the left
+insert_left val (Node n left right) = Node n (insert_left val left) right 
 
 -- Insert a new node in the rightmost spot in the tree
 insert_right :: a -> Tree a -> Tree a
-insert_right = undefined
+-- if we hit the empty on the right side then insert the new node
+insert_right val Empty = Node val Empty Empty
+-- if we don't hit empty immediately, then traverse down the right
+insert_right val (Node n left right) = Node n left (insert_right val right)
 
 -- Add up all the node values in a tree of numbers
 sum_nodes :: (Num a) => Tree a -> a
-sum_nodes = undefined
+-- if we hit empty then add 0 and end the recursion
+sum_nodes Empty = 0
+-- if we don't hit empty then add the value inside the node then
+-- call sum_nodes on the left and right to add the rest of the values
+sum_nodes (Node val left right) = val + (sum_nodes left) + (sum_nodes right)
 
 -- Produce a list of the node values in the tree via an inorder traversal
 -- Feel free to use concatenation (++)
 inorder :: Tree a -> [a]
-inorder = undefined
+inorder Empty = []
+inorder (Node val left right) = (inorder left) ++ [val] ++ (inorder right)
 
 ---- Part 2: Iteration and Accumulators ----------------
 
