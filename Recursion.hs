@@ -51,18 +51,34 @@ toBList (x : xs) = cons x $ toBList xs
 
 -- Add an element to the end of an ordinary list, like Snoc does
 snoc :: [a] -> a -> [a]
-snoc = undefined
+-- once we reach the end of the node, send back the list with the element
+snoc [] n = [n] 
+-- whenever we're not at the end, send back xs with the element to add
+-- until we reach the base case
+snoc (x:xs) n = x:(snoc xs n)
+
+
 
 -- Convert a BList into an ordinary list (hint: use snoc in the recursive case)
 fromBList :: BList a -> [a]
-fromBList = undefined
+-- whenever we reach nil and n then just return [n]
+fromBList (Snoc Nil n) = [n]
+-- whenever we're not at the innermost layer, keep moving inward by sending bl
+-- then once the recursion ends, use snoc to build the array by adding to the back
+fromBList (Snoc bl x) = snoc (fromBList bl) x 
 
 -- 3. A binary tree data structure
 data Tree a = Empty | Node a (Tree a) (Tree a) deriving (Show, Eq)
 
 -- Count number of Empty's in the tree
 num_empties :: Tree a -> Int
-num_empties = undefined
+-- if we find an empty send a 1 back
+num_empties Empty = 1
+-- whenever we're not at empty nodes, send the next two children of the cur node
+-- then recursively add them back up to count the number of empties
+num_empties ( Node _ (left) (right)) = num_empties left + num_empties right 
+
+
 
 -- Count number of Node's in the tree
 num_nodes :: Tree a -> Int
