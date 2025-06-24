@@ -1,0 +1,436 @@
+Assignment 1 "Scientific Exploration" (edit and submit this file)
+
+Without consulting any outside sources except for ghci, specificially
+
+   :type or :t   print the type of any expression
+   :info or :i   print info about an expression, type, or typeclass,
+
+determine the type of each of the following functions or operators,
+and then, using this type information, try applying the function to
+expressions of the appropriate types until you form a good hypothesis
+of what the funciton does. Conduct some additional experiments to see
+if your hypothesis is correct. Once you are convinced that you've
+figured it out, describe your understanding of the function in a
+paragraph, and give a ghci transcript showing the key experiments you
+used to arrive at this understanding.
+
+I've done one to illustrate how its done.
+
+
+==== succ, pred ====
+
+succ :: Enum a => a -> a
+pred :: Enum a => a -> a
+
+For any Enum type, succ gives the next element of the type after the
+given one, and pred gives the previous. Asking for the succ of the
+last element of the type, or the pred of the first element of the type
+results in an error.
+
+ghci> succ 5
+6
+ghci> succ 'd'
+'e'
+ghci> succ False
+True
+ghci> succ True
+*** Exception: Prelude.Enum.Bool.succ: bad argument
+ghci> pred 6
+5
+ghci> pred 'e'
+'d'
+ghci> pred True
+False
+ghci> pred False
+*** Exception: Prelude.Enum.Bool.pred: bad argument
+
+==== (^) ====
+(^) :: (Num a, Integral b) => a -> b -> a
+
+Given a Num type a and an integral type b, integral meaning Int or Integer, 
+it returns the exponent in terms of arg a to the power of arg b, that is a^b.
+With this restriction, it will throw an error if the arguments are mismatched types.
+
+ghci> 5 ^ 8
+390625
+ghci> 1 ^ 2
+1
+ghci> 2 ^ 2
+4
+ghci> 'a' ^ 3
+
+<interactive>:8:5: error:
+    * No instance for (Num Char) arising from a use of `^'
+    * In the expression: 'a' ^ 3
+      In an equation for `it': it = 'a' ^ 3
+
+
+
+
+==== gcd, lcm ====
+gcd :: Integral a => a -> a -> a
+lcm :: Integral a => a -> a -> a
+
+Given an Integral 2 arguments of type a, that are Num or Integer, return the greatest common divisor (gcd)
+or least common multiple (lcm) respectively. The program will throw an error if an Integral type
+is not provided for its arguments.
+
+ghci> gcd 5 10
+5
+ghci> gcd 15 7
+1
+ghci> gcd 30 15
+15
+<interactive>:17:1: error:
+    * No instance for (Integral Char) arising from a use of `gcd'
+    * In the expression: gcd 'a' 'b'
+      In an equation for `it': it = gcd 'a' 'b'
+ghci> gcd (-5) 30
+5
+
+ghci> lcm 30 15
+30
+ghci> lcm 6 6
+6
+ghci> lcm 1 6
+6
+ghci> lcm 17 15
+255
+ghci> lcm 17 'a'
+
+<interactive>:29:1: error:
+    * No instance for (Integral Char) arising from a use of `lcm'
+    * In the expression: lcm 17 'a'
+      In an equation for `it': it = lcm 17 'a'
+
+<interactive>:29:5: error:
+    * No instance for (Num Char) arising from the literal `17'
+    * In the first argument of `lcm', namely `17'
+      In the expression: lcm 17 'a'
+      In an equation for `it': it = lcm 17 'a'
+
+
+
+
+
+==== quotRem, divMod ====
+quotRem :: Integral a => a -> a -> (a, a)
+divMod :: Integral a => a -> a -> (a, a)
+
+
+ghci> quotRem 5 1
+(5,0)
+ghci> divMod 5 1
+(5,0)
+ghci> quotRem 30 5
+(6,0)
+ghci> quotRem 5 30 
+(0,5)
+ghci> divMod 30 5 
+(6,0)
+ghci> divMod 5 30 
+(0,5)
+ghci> quotRem (-7) 3
+(-2,-1)
+ghci> divMod (-7) 3
+(-3,2)
+
+
+Given an Integral of type a, both functions require 2 arguments, the dividend and divisor respectively. They then return the tuple of the quotient and remainder.
+Where these two functions differ is when you apply negative arguments. quotRem rounds up towards 0, while divMod rounds down towards -inf.
+
+
+==== max, min ====
+
+max :: Ord a => a -> a -> a
+min :: Ord a => a -> a -> a
+
+Given an Ord type a, with two arguments of that type a, it returns the max or the min respectively between those two arguments.
+
+ghci> max 50 30
+50
+ghci> max 1 30
+30
+ghci> max (-10) 5
+5
+ghci> min (-50) 3
+-50
+ghci> min 50 30
+30
+ghci> min 1 2
+1
+
+
+
+==== null ====
+null :: Foldable t => t a -> Bool
+
+Given a Foldable argument of type a, it returns a true or a false based on whether the Foldable is null
+
+ghci> null [1,2]
+False
+ghci> null []
+True
+ghci> null (-1)
+
+<interactive>:57:7: error:
+    * No instance for (Num [a0])
+        arising from a use of syntactic negation
+    * In the first argument of `null', namely `(- 1)'
+      In the expression: null (- 1)
+      In an equation for `it': it = null (- 1)
+
+==== elem ====
+
+elem :: (Foldable t, Eq a) => a -> t a -> Bool
+
+Given an arg of type a Foldable arg t of type a where the arg a's are able to be compared to operators such as == or /=
+it returns whether or not the first arg is found in the container t
+
+ghci> elem 5 [5]
+True
+ghci> elem 5 [5,1]
+True
+ghci> elem 5 [2,1]
+False
+
+
+
+==== init ====
+
+init :: GHC.Stack.Types.HasCallStack => [a] -> [a]
+
+Given a list of type a, it returns the same list with the last element dropped, and returns an exception on an empty list.
+
+ghci> init [1,2]
+[1]
+ghci> init "12345"
+"1234"
+ghci> init []
+*** Exception: Prelude.init: empty list
+CallStack (from HasCallStack):
+  error, called at libraries\base\GHC\List.hs:1646:3 in base:GHC.List
+  errorEmptyList, called at libraries\base\GHC\List.hs:178:28 in base:GHC.List
+  init, called at <interactive>:65:1 in interactive:Ghci39
+
+
+
+
+==== last ====
+
+last :: GHC.Stack.Types.HasCallStack => [a] -> a
+
+Given an input list of type a, it returns the last value of that list
+
+ghci> last [1,2,3]
+3
+ghci> last "abcd"
+'d'
+
+
+
+
+==== reverse ====
+
+reverse :: [a] -> [a]
+
+Given an input list of type a, return the reversed list.
+
+
+
+ghci> reverse [1,2,3]
+[3,2,1]
+ghci> reverse "hello"
+"olleh"
+ghci> reverse 'a'
+
+<interactive>:74:9: error:
+    * Couldn't match expected type `[a]' with actual type `Char'
+    * In the first argument of `reverse', namely 'a'
+      In the expression: reverse 'a'
+      In an equation for `it': it = reverse 'a'
+    * Relevant bindings include it :: [a] (bound at <interactive>:74:1)
+
+
+==== concat ====
+
+concat :: Foldable t => t [a] -> [a]
+
+Given a container of lists, return that container as a list with the elements merged.
+
+ghci> concat [[1,2,3],[2,1]]
+[1,2,3,2,1]
+ghci> concat [[1],[2],[3]]
+[1,2,3]
+
+
+==== repeat ====
+
+repeat :: a -> [a]
+
+Given an input, return an infinite list of that input repeated.
+I used take in order to limit the infinite list to a predetermined amount.
+
+
+ghci> take 15 $ repeat 1
+[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+ghci> take 15 $ repeat [1,2]
+[[1,2],[1,2],[1,2],[1,2],[1,2],[1,2],[1,2],[1,2],[1,2],[1,2],[1,2],[1,2],[1,2],[1,2],[1,2]]
+
+
+==== replicate ====
+
+replicate :: Int -> a -> [a]
+
+Given an input of Int type and another of type a, return a list of type a
+where the initial input was how many elements the list should have and input
+2 is what should be populating the list.
+
+ghci> replicate 1 15
+[15]
+ghci> replicate 15 15
+[15,15,15,15,15,15,15,15,15,15,15,15,15,15,15]
+ghci> replicate (-1) 15
+[]
+ghci> replicate 15 (-1)
+[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]
+
+
+
+==== cycle ====
+cycle :: GHC.Stack.Types.HasCallStack => [a] -> [a]
+
+Given an input list of type a, return an infinite list that cycles through the list over and over.
+
+ghci> take 15 $ [1,2,3]
+[1,2,3]
+ghci> cycle [1,2,3]
+[1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,Interrupted.
+ghci> take 5 (cycle [1,2,3])
+[1,2,3,1,2]
+
+
+
+
+==== splitAt ====
+splitAt :: Int -> [a] -> ([a], [a])
+
+Given an input of Int type and a list of type a, return a tuple of
+the two new lists which have been split at the position specified by the
+Int input.
+
+ghci> splitAt 3 [1,2,3,4,5,6,7]
+([1,2,3],[4,5,6,7])
+ghci> splitAt 3 "hello"
+("hel","lo")
+
+==== zip ====
+zip :: [a] -> [b] -> [(a, b)]
+
+Given an input list of type a and an input list of type b, return a list of tuples of the two lists
+where each index from each list is paired together, any extra indices are dropped.
+
+ghci> zip [1,2,3] [4,5,6]
+[(1,4),(2,5),(3,6)]
+ghci> zip [1,2,3] [4,5,6,7]
+[(1,4),(2,5),(3,6)]
+ghci> zip "hello" [1,2,3,4,5]
+[('h',1),('e',2),('l',3),('l',4),('o',5)]
+
+==== zipWith ====
+zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
+
+Given an input function which takes in two inputs of type a and b, a list of type a, a list of type b, it returns a list of type c
+where the list has the elements from list type a and list type b operated on by the function specified in the input.
+
+ghci> zipWith (+) [1,2,3] [4,5,6]
+[5,7,9]
+ghci> zipWith (-) [1,2,3] [4,5,6]    
+[-3,-3,-3]
+
+
+==== all, any ====
+
+all :: Foldable t => (a -> Bool) -> t a -> Bool
+any :: Foldable t => (a -> Bool) -> t a -> Bool
+
+Given an input function which takes in one input and returns a Bool, and a Foldable container of type a,
+in all's case return a true or false based on whether all elements return true for the function applied on the container's elements,
+and in any's case return a true or false based on whether any of the elements return true for the function applied on the container's elements
+
+ghci> all (== 1) [1,2,3]
+False
+ghci> all (== 1) [1,1,1]
+True
+ghci> any (==1) [1,2,3]
+True
+ghci> any (== 1) [1,1,1]
+True
+
+==== break ====
+break :: (a -> Bool) -> [a] -> ([a], [a])
+
+Given an input function which has one input of type a and returns a Bool, and a list of type a,
+return a pair of lists of type a which list 1 is everything before the function is satisfied,
+and list two is everything after which the function was satisfied
+
+ghci> break (==1) [1,2,3]
+([],[1,2,3])
+ghci> break (==3) [1,2,3]
+([1,2],[3])
+ghci> break (==1) [1,2,3,1]
+([],[1,2,3,1])
+ghci> break (==2) [1,2,3,1,2]
+([1],[2,3,1,2])
+
+==== dropWhile, takeWhile ====
+dropWhile :: (a -> Bool) -> [a] -> [a]
+takeWhile :: (a -> Bool) -> [a] -> [a]
+
+Given an input function which takes in an input of type a and return a Bool, a list of type a,
+for dropWhile it returns a list that drops until the function is not satisfied,
+for takeWhile it returns a list that has elements that satisfy the function up until the function is no longer satisfied
+
+ghci> dropWhile (==1) [1,2,3,4]
+[2,3,4]
+ghci> dropWhile (==1) [1,2,3,4,1]
+[2,3,4,1]
+ghci> takeWhile (==1) [1,2,3,4,1]
+[1]
+ghci> takeWhile (==1) [3,2,1,4,1]
+[]
+ghci> takeWhile (==1) [1,1,1,4,1]
+[1,1,1]
+
+
+==== iterate ====
+iterate :: (a -> a) -> a -> [a]
+
+Given an input function which takes in an input of type a and returns that same type, an input of type a,
+return an infinite list that has an initial value of the second input and continues to operate on the previous
+element with the input function.
+
+ghci> take 15 $ iterate (\x -> x+1) 5
+[5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+ghci> take 15 $ iterate (\x -> x+1) 1
+[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+
+
+==== span ====
+span :: (a -> Bool) -> [a] -> ([a], [a])
+
+Given an input function that requires an input of type a and returns a Bool, a list of type a,
+it returns a pair of lists of type a where the first part of the pair is the list which starts from
+the initial element of the original list and goes up until the element which fails the input function,
+and the second part of the pair is the part thereafter.
+
+
+ghci> span (==1) [1,2,3,4]
+([1],[2,3,4])
+ghci> span (==2) [1,2,3,4]
+([],[1,2,3,4])
+ghci> span (==1) [1,1,1,2,3,4]
+([1,1,1],[2,3,4])
+ghci> span (==1) [1,1,1,2,3,4,1,1,1,1]
+([1,1,1],[2,3,4,1,1,1,1])
+
