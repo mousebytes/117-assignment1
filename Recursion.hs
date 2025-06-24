@@ -244,11 +244,19 @@ my_concat xs = foldr (++) [] xs
 
 -- Implement the Prelude functions sum, product, reverse using foldl
 
+-- foldl looks like:
+-- foldl f z [x1,x2,x3]
+-- (((z `f` x1) `f` x2) `f` x3)
+
+-- f is function / z is accumulator / [] is input array
+
 my_sum :: (Num a) => [a] -> a
-my_sum = undefined
+my_sum xs = foldl (+) 0 xs
 
 my_product :: (Num a) => [a] -> a
-my_product = undefined
+my_product xs = foldl (*) 1 xs
 
 my_reverse :: [a] -> [a]
-my_reverse = undefined
+-- flip fixes the type order of (:) -> meaning that instead of a -> [a] -> [a] it expects [a] -> a -> [a]
+-- in this case it means that flip [] (:) x1 will become x1 : []
+my_reverse xs = foldl (flip (:)) [] xs
