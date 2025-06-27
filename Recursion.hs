@@ -258,5 +258,5 @@ my_product xs = foldl (*) 1 xs
 
 my_reverse :: [a] -> [a]
 -- flip fixes the type order of (:) -> meaning that instead of a -> [a] -> [a] it expects [a] -> a -> [a]
--- in this case it means that flip [] (:) x1 will become x1 : []
+-- in this case it means that flip (:) [] x1 will become x1 : []
 my_reverse xs = foldl (flip (:)) [] xs
